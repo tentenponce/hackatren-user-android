@@ -32,7 +32,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         init()
     }
 
-    fun init() {
+    private fun init() {
         /* init maps */
         (supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment).getMapAsync(this)
 
