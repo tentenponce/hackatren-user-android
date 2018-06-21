@@ -1,7 +1,6 @@
 package com.nasaanka.ui.main
 
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -23,7 +22,6 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, MainMvpView {
 
     private lateinit var mMap: GoogleMap
 
-    private lateinit var lastLocation: Location
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     @Inject
@@ -67,8 +65,6 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, MainMvpView {
         /* add listener for own location */
         fusedLocationClient.lastLocation.addOnSuccessListener(this) { location ->
             if (location != null) {
-                lastLocation = location
-
                 mPresenter.setMyLocation(latitude = location.latitude, longitude = location.longitude)
             }
         }
