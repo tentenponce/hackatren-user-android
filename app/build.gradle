@@ -25,6 +25,7 @@ dependencies {
     final SUPPORT_LIBRARY_VERSION = '27.1.1'
     final DAGGER_VERSION = '2.5'
     final ANNOTATION_VERSION = '10.0-b28'
+    final RX_JAVA_VERSION = '2.1.10'
 
     implementation "com.android.support:appcompat-v7:$SUPPORT_LIBRARY_VERSION"
     implementation "com.android.support:design:$SUPPORT_LIBRARY_VERSION"
@@ -41,6 +42,9 @@ dependencies {
     implementation "com.google.dagger:dagger:$DAGGER_VERSION"
     compileOnly "org.glassfish:javax.annotation:$ANNOTATION_VERSION"
     kapt "com.google.dagger:dagger-compiler:$DAGGER_VERSION"
+
+    /* rxjava */
+    implementation "io.reactivex.rxjava2:rxjava:$RX_JAVA_VERSION"
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
