@@ -1,10 +1,10 @@
 package com.nasaanka.ui.main
 
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -22,10 +22,15 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, MainMvpView {
 
     private lateinit var mMap: GoogleMap
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var fusedLocationClient: FusedLocationProviderClient? = null
+
+    private lateinit var locationRequest: LocationRequest
+    private lateinit var locationCallback: LocationCallback
 
     @Inject
     lateinit var mPresenter: MainPresenter
+
+    private var hasPermission: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +38,18 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, MainMvpView {
         activityComponent()?.inject(this)
         mPresenter.attachView(this)
 
+        hasPermission = hasPermission()
         init()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        startLocationUpdates()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopLocationUpdates()
     }
 
     override fun onDestroy() {
@@ -42,40 +58,93 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, MainMvpView {
         mPresenter.detachView()
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        var index = 0
+        val PermissionsMap = HashMap<String, Int>()
+        for (permission in permissions) {
+            PermissionsMap[permission] = grantResults[index]
+            index++
+        }
+
+        hasPermission = PermissionsMap.get(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED
+
+        if (hasPermission) {
+            recreate()
+        }
+    }
+
     override fun redirectToMapLocation(longitude: Double, latitude: Double) {
         val currentLatLng = LatLng(latitude, longitude)
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 13f))
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onMapReady(googleMap: GoogleMap) {
+        mMap = googleMap
+
+        mMap.uiSettings.isZoomGesturesEnabled = true
+
+        if (hasPermission) {
+            mMap.isMyLocationEnabled = true
+
+            /* add listener for own location */
+            fusedLocationClient?.lastLocation?.addOnSuccessListener(this) { location ->
+                if (location != null) {
+                    mPresenter.setMyLocation(latitude = location.latitude, longitude = location.longitude)
+                }
+            }
+        }
     }
 
     private fun init() {
         /* init maps */
         (supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment).getMapAsync(this)
 
-        /* init my location */
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-    }
+        /* init location updates */
+        locationRequest = LocationRequest().apply {
+            interval = 10000
+            fastestInterval = 5000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
-        checkPermission()
-
-        mMap.uiSettings.isZoomGesturesEnabled = true
-        mMap.isMyLocationEnabled = true
-
-        /* add listener for own location */
-        fusedLocationClient.lastLocation.addOnSuccessListener(this) { location ->
-            if (location != null) {
-                mPresenter.setMyLocation(latitude = location.latitude, longitude = location.longitude)
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                locationResult ?: return
+                for (location in locationResult.locations) {
+                    mPresenter.setMyLocation(latitude = location.latitude, longitude = location.longitude)
+                }
             }
         }
+
+        /* init my location */
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        startLocationUpdates()
     }
 
-    private fun checkPermission() {
-        if (ActivityCompat.checkSelfPermission(this,
-                        android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+    @SuppressLint("MissingPermission")
+    private fun startLocationUpdates() {
+        if (hasPermission) {
+            fusedLocationClient?.requestLocationUpdates(locationRequest,
+                    locationCallback,
+                    null)
+        }
+    }
+
+    private fun stopLocationUpdates() {
+        fusedLocationClient?.removeLocationUpdates(locationCallback)
+    }
+
+    private fun hasPermission(): Boolean {
+        val hasPermission: Boolean = ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasPermission) {
             ActivityCompat.requestPermissions(this,
                     arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
-            return
         }
+
+        return hasPermission
     }
 }
