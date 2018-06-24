@@ -12,6 +12,7 @@ buildscript {
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+        classpath 'com.google.gms:google-services:3.2.0'
     }
 }
 
@@ -19,6 +20,35 @@ allprojects {
     repositories {
         google()
         jcenter()
+    }
+
+    project.ext {
+        compileSdkVersion = 27
+        buildToolsVersion = '27.0.3'
+        minSdkVersion = 16
+        targetSdkVersion = 27
+
+        supportLibraryVersion = '27.1.1'
+
+        androidTestVersion = '1.0.2'
+        jUnitVersion = '4.12'
+        espressoVersion = '3.0.2'
+
+        rxJavaVersion = '2.1.10'
+        rxAndroidVersion = '2.0.2'
+
+        daggerVersion = '2.5'
+        annotationVersion = '10.0-b28'
+
+        autoValueVersion = '1.5.3'
+        autoValueGsonVersion = '0.7.0'
+        autoValueParcelVersion = '0.2.6'
+        autoValueAnnotationsVersion = '1.5'
+        javaxInjectVersion = '1'
+
+        gsonVersion = '2.8.2'
+
+        firebaseVersion = '16.0.1'
     }
 }
 
