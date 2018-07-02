@@ -1,5 +1,6 @@
 package com.nasaanka.ui.main
 
+import com.nasaanka.domain.interactor.train.GetTrainLocations
 import com.nasaanka.domain.interactor.user.SaveUserLocation
 import com.nasaanka.domain.model.User
 import com.nasaanka.ui.base.BasePresenter
@@ -13,7 +14,8 @@ import javax.inject.Inject
  * Created by Exequiel Egbert V. Ponce on 6/17/2018.
  */
 
-class MainPresenter @Inject constructor(val saveUserLocation: SaveUserLocation) : BasePresenter<MainMvpView>() {
+class MainPresenter @Inject constructor(val saveUserLocation: SaveUserLocation,
+                                        val getTrainLocations: GetTrainLocations) : BasePresenter<MainMvpView>() {
 
     private var mLatitude: Double = 0.0
         set(value) { // override set method
@@ -40,7 +42,7 @@ class MainPresenter @Inject constructor(val saveUserLocation: SaveUserLocation) 
                 .flatMapCompletable({
                     saveUserLocation.execute(User(id = "", latitude = it.first, longitude = it.second))
                 })
-                .doOnSubscribe({ compositeDisposable::add })
+                .doOnSubscribe { compositeDisposable::add }
                 .subscribe()
     }
 
@@ -51,5 +53,13 @@ class MainPresenter @Inject constructor(val saveUserLocation: SaveUserLocation) 
         if (isViewAttached) {
             mvpView?.redirectToMapLocation(mLongitude, mLatitude)
         }
+    }
+
+    fun getTrainLocations() {
+        getTrainLocations.execute()
+                .flatMap { Observable.fromIterable(it) }
+                .doOnNext { mvpView?.updateTrainMarker(it) }
+                .doOnSubscribe { compositeDisposable::add }
+                .subscribe()
     }
 }

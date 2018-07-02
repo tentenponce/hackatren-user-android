@@ -3,12 +3,14 @@ package com.nasaanka.di.module
 import android.content.Context
 import com.nasaanka.data.common.executor.JobExecutor
 import com.nasaanka.data.impl.DeviceRepositoryImpl
+import com.nasaanka.data.impl.TrainRepositoryImpl
 import com.nasaanka.data.impl.UserRepositoryImpl
 import com.nasaanka.data.service.FirebaseService
 import com.nasaanka.di.AppContext
 import com.nasaanka.domain.common.executor.PostExecutionThread
 import com.nasaanka.domain.common.executor.ThreadExecutor
 import com.nasaanka.domain.repository.DeviceRepository
+import com.nasaanka.domain.repository.TrainRepository
 import com.nasaanka.domain.repository.UserRepository
 import com.nasaanka.util.provider.ThreadProvider
 import dagger.Module
@@ -47,5 +49,11 @@ class DomainModule {
     @Singleton
     internal fun deviceRepository(@AppContext context: Context): DeviceRepository {
         return DeviceRepositoryImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    internal fun trainRepository(service: FirebaseService): TrainRepository {
+        return TrainRepositoryImpl(service)
     }
 }

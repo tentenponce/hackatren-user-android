@@ -13,6 +13,6 @@ import javax.inject.Inject
 class UserRepositoryImpl @Inject constructor(val firebaseService: FirebaseService) : UserRepository {
 
     override fun saveUserLocation(user: User): Completable =
-            firebaseService.write(FirebaseService.TRAIN_LOCATION_TABLE, user.id, user)
+            firebaseService.write(FirebaseService.LOCATION_TABLE, user.id, user)
 
 }

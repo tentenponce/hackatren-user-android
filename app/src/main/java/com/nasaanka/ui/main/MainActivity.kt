@@ -14,20 +14,24 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.nasaanka.R
+import com.nasaanka.domain.model.Train
 import com.nasaanka.ui.base.BaseActivity
+import com.nasaanka.util.TrainFactory
 import javax.inject.Inject
 
 class MainActivity : BaseActivity(), OnMapReadyCallback, MainMvpView {
 
     companion object {
+
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
 
     private lateinit var mMap: GoogleMap
+    private var trainMarkers: MutableMap<String, Marker> = hashMapOf()
 
     private var fusedLocationClient: FusedLocationProviderClient? = null
-
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
 
@@ -44,6 +48,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, MainMvpView {
 
         hasPermission = hasPermission()
         init()
+        mPresenter.getTrainLocations()
     }
 
     override fun onResume() {
@@ -81,6 +86,18 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, MainMvpView {
     override fun redirectToMapLocation(longitude: Double, latitude: Double) {
         val currentLatLng = LatLng(latitude, longitude)
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 13f))
+    }
+
+    override fun updateTrainMarker(train: Train) {
+        val trainMarker: Marker? = trainMarkers.get(train.name) // get marker
+
+        if (trainMarker != null) { // check if specific train marker already exists on the map
+            trainMarker.position = LatLng(train.latitude, train.longitude)
+        } else { // else add it on the map
+            val marker = mMap.addMarker(TrainFactory.buildTrainMarker(train))
+
+            trainMarkers.put(train.name, marker)
+        }
     }
 
     @SuppressLint("MissingPermission")

@@ -9,6 +9,7 @@ import com.nasaanka.di.module.DomainModule
 import com.nasaanka.domain.common.executor.PostExecutionThread
 import com.nasaanka.domain.common.executor.ThreadExecutor
 import com.nasaanka.domain.repository.DeviceRepository
+import com.nasaanka.domain.repository.TrainRepository
 import com.nasaanka.domain.repository.UserRepository
 import dagger.Component
 import javax.inject.Singleton
@@ -37,4 +38,6 @@ interface AppComponent {
     fun userRepository(): UserRepository
 
     fun deviceRepository(): DeviceRepository
+
+    fun trainRepository(): TrainRepository
 }
