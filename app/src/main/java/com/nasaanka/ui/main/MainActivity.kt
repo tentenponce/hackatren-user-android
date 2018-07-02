@@ -93,6 +93,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, MainMvpView {
 
         if (trainMarker != null) { // check if specific train marker already exists on the map
             trainMarker.position = LatLng(train.latitude, train.longitude)
+            trainMarker.setIcon(TrainFactory.getStatusIcon(train.status))
         } else { // else add it on the map
             val marker = mMap.addMarker(TrainFactory.buildTrainMarker(train))
 
