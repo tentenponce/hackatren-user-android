@@ -85,7 +85,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, MainMvpView {
 
     override fun redirectToMapLocation(longitude: Double, latitude: Double) {
         val currentLatLng = LatLng(latitude, longitude)
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 13f))
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 14f))
     }
 
     override fun updateTrainMarker(train: Train) {
